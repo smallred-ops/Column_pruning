@@ -15,4 +15,3 @@ def sparsity_ratio(model):
     pruning_rate = (total_param - nonzero_param) / total_param
     print("total pruning rate: {} / {} ({:.4f}%)".
           format(nonzero_param, total_param, 100 * pruning_rate))
-
