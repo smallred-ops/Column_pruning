@@ -114,15 +114,12 @@ def evaluate(bptt, eval_model, data_source, TEXT, criterion):
     return total_loss / len(data_source), total_accuracy / len(data_source)
 
 
-def train_prune(model,column_pattern_dict):
+def train_prune(args,model,column_pattern_dict):
     best_accuracy= float(0)
     best_model = None
 
-    lr = 0.23
-    epochs = 10
-
     criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.SGD(model.parameters(), lr)
+    optimizer = torch.optim.SGD(model.parameters(), args.lr)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, 1, gamma=0.95)
 
     print('-' * 89)
@@ -140,7 +137,7 @@ def train_prune(model,column_pattern_dict):
     test_loss,test_accuracy = evaluate(bptt,model,test_data,TEXT,criterion)
     print('| test before training | loss {:5.2f} | accuracy {:8.4f}'.format(test_loss, test_accuracy))
 
-    for epoch in range(1, epochs + 1):
+    for epoch in range(1, args.epochs + 1):
         epoch_start_time = time.time()
         print('-' * 89)
         train(bptt, model, TEXT, train_data, optimizer, criterion, scheduler, epoch, device, column_pattern_dict)
@@ -152,43 +149,62 @@ def train_prune(model,column_pattern_dict):
             best_model = model
 
         scheduler.step()
-    pruning_rate = sparsity_ratio(best_model)
+    sparsity_ratio(best_model)
     print('-' * 89)
     reward_loss, reward_accuracy = evaluate(bptt, model, test_data, TEXT, criterion)
     print('| end of training | loss {:5.2f} | accuracy {:8.4f}'.format(reward_loss, reward_accuracy))
     print('-' * 89)
-    torch.save(best_model.state_dict(), './model/random_column_pruning.pt')
+    torch.save(best_model.state_dict(), args.save_file)
     print('random column pruning model saved!')
 
     return reward_accuracy
 
+def main(args):
+    prune_ratios = load_config_file(args.config_file)
+    print("prune_ratios:",prune_ratios)
 
-block_size = 100
-config_file = './config_file/prune_ratio_v6.yaml'
-prune_ratios = load_config_file(config_file)
-print("prune_ratios:",prune_ratios)
+    if args.random:
+        print('#' * 89)
+        print('A.only column pruning from 50epochs model')
+        print('B.random generate column pattern')
+        print('C.fine-tune {} epochs'.format(args.epochs))
+        print('#' * 89)
+        model.load_state_dict(torch.load('./model/transformer_model_lr_3.0_50.pt'))
+        column_whole_pattern_dict = random_generate_column_whole_pattern(model,prune_ratios,args.block_size)
+        train_prune(args,model,column_whole_pattern_dict)
+    else:#fine-tune precompression model
+        print('#' * 89)
+        print('A.only column pruning from 50epochs model')
+        print('B.extract original whole pattern from bingbing model(10epochs)')
+        print('C.fine-tune {} epochs'.format(args.epochs))
+        print('#' * 89)
+        # model.load_state_dict(torch.load('./model/transformer_retrained_acc_0.913_block_column_penalty_transformer_v229_0.0001_0.0001_prune_ratio_v6.pt'))
+        model.load_state_dict(torch.load('./model/transformer_retrained_acc_0.930_block_filter_penalty_transformer_v229_0.0001_0.0001_prune_ratio_v6.pt'))
+        original_whole_pattern = extract_original_layers_whole_pattern(model,device)
+        model.load_state_dict(torch.load('./model/transformer_model_lr_3.0_50.pt'))
+        train_prune(args,model, original_whole_pattern)
 
-random_column = True
-if random_column:
-    print('#' * 89)
-    print('A.only column pruning from 50epochs model')
-    print('B.random generate column pattern')
-    print('C.fine-tune 10 epochs')
-    print('#' * 89)
-    model.load_state_dict(torch.load('./model/transformer_model_lr_3.0_50.pt'))
-    column_whole_pattern_dict = random_generate_column_whole_pattern(model,prune_ratios,block_size)
-    train_prune(model,column_whole_pattern_dict)
-else:#fine-tune precompression model
-    print('#' * 89)
-    print('A.only column pruning from 50epochs model')
-    print('B.extract original whole pattern from bingbing model(10epochs)')
-    print('C.fine-tune 10 epochs')
-    print('#' * 89)
-    # model.load_state_dict(torch.load('./model/transformer_retrained_acc_0.913_block_column_penalty_transformer_v229_0.0001_0.0001_prune_ratio_v6.pt'))
-    model.load_state_dict(torch.load('./model/transformer_retrained_acc_0.930_block_filter_penalty_transformer_v229_0.0001_0.0001_prune_ratio_v6.pt'))
-    original_whole_pattern = extract_original_layers_whole_pattern(model,device)
-    for name in original_whole_pattern:
-        plot_heatmap(name,original_whole_pattern[name],'./jpg/')
-    exit()
-    model.load_state_dict(torch.load('./model/transformer_model_lr_3.0_50.pt'))
-    train_prune(model, original_whole_pattern)
+
+def parse_args():
+    import argparse
+    parser = argparse.ArgumentParser(description='Random Column pruning')
+    parser.add_argument('--epochs', default=1, type=int, metavar='N',
+                        help='number of total epoch to run')
+    parser.add_argument('--lr',default=0.23,type=float,
+                        help='learning rate')
+    parser.add_argument('--block-size',default=100,type=int,metavar='N',
+                        help='block size')
+    parser.add_argument('--config-file',default='./config_file/prune_ratio_v1.yaml',
+                        help='config file of prune ratios for every layers')
+    parser.add_argument('--random',action='store_true',help='generate column pattern random or not')
+    parser.add_argument('--save-file',default='./model/random_column_pruning_average.pt',
+                        help='model save location')
+
+    args = parser.parse_args()
+    return args
+
+if __name__ == '__main__':
+    args = parse_args()
+    main(args)
+
+#CUDA_VISIBLE_DEVICES=3 nohup python -u c_only_random_column_pruning.py --epochs 10 --random > only_random_column_pruning_average
