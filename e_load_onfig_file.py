@@ -1,3 +1,7 @@
+'''
+    This file is for loading the configure file.
+'''
+
 import yaml
 
 # Different block size for different layers:

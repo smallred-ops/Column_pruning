@@ -1,8 +1,12 @@
+'''
+    This file is for the random column generation for rBP.
+    According to the pruning ratio, the positions for column pruning are determined randomly.
+'''
+
 import random
 
 import torch
 from b_pattern_pruning_CPU import weight_padding, weight_depadding
-
 
 
 def random_generate_column_whole_pattern(model,prune_ratios,block_size):

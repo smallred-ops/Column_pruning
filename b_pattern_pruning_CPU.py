@@ -1,3 +1,7 @@
+'''
+    This file is for the pattern pruning and save the whole mask of the weight in every layer.
+'''
+
 import torch
 import numpy as np
 

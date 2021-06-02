@@ -1,3 +1,7 @@
+'''
+    This file is the class of Transformer model.
+'''
+
 import math
 import torch
 import torch.nn as nn

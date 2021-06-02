@@ -1,3 +1,9 @@
+'''
+    This file is for the representative patterns extraction method.
+    For every layer, extract 10 patterns for every sparsity ratio.
+    This method is for search space generation heuristically.
+'''
+
 import random
 import torch
 from b_pattern_pruning_CPU import weight_padding, weight_depadding
@@ -68,7 +74,7 @@ def generate_layer_pattern(importance_weight_dict,block_size,pruning_number_list
             pruning_rate_pattern_list = []
             for tuple in max_p_weight_list:
                 sequence_matrix = tuple[1].view(-1)
-                sort, idx = torch.sort(sequence_matrix,descending=True)
+                sort, idx = torch.sort(sequence_matrix)
                 pattern = torch.ones(block_size, block_size,dtype=torch.int)
                 importance_matrix = idx[0:pruning_number]
                 for location in importance_matrix:

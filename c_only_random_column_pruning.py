@@ -1,3 +1,8 @@
+'''
+    This file is for the random column pruning using the generated column mask.
+    Train and obtain the accuracy of rBP and our BP.
+'''
+
 import copy
 import math
 import os
@@ -149,7 +154,6 @@ def train_prune(args,model,column_pattern_dict):
             best_model = model
 
         scheduler.step()
-    sparsity_ratio(best_model)
     print('-' * 89)
     reward_loss, reward_accuracy = evaluate(bptt, model, test_data, TEXT, criterion)
     print('| end of training | loss {:5.2f} | accuracy {:8.4f}'.format(reward_loss, reward_accuracy))
@@ -170,7 +174,8 @@ def main(args):
         print('C.fine-tune {} epochs'.format(args.epochs))
         print('#' * 89)
         model.load_state_dict(torch.load('./model/transformer_model_lr_3.0_50.pt'))
-        column_whole_pattern_dict = random_generate_column_whole_pattern(model,prune_ratios,args.block_size)
+        block_size = 28785 // 5
+        column_whole_pattern_dict = random_generate_column_whole_pattern(model,prune_ratios,block_size)
         train_prune(args,model,column_whole_pattern_dict)
     else:#fine-tune precompression model
         print('#' * 89)
@@ -184,7 +189,6 @@ def main(args):
         model.load_state_dict(torch.load('./model/transformer_model_lr_3.0_50.pt'))
         train_prune(args,model, original_whole_pattern)
 
-
 def parse_args():
     import argparse
     parser = argparse.ArgumentParser(description='Random Column pruning')
@@ -197,7 +201,7 @@ def parse_args():
     parser.add_argument('--config-file',default='./config_file/prune_ratio_v1.yaml',
                         help='config file of prune ratios for every layers')
     parser.add_argument('--random',action='store_true',help='generate column pattern random or not')
-    parser.add_argument('--save-file',default='./model/random_column_pruning_average.pt',
+    parser.add_argument('--save-file',default='./model/random_column_pruning_test_for_encoder.pt',
                         help='model save location')
 
     args = parser.parse_args()
