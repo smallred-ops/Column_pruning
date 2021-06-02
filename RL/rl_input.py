@@ -9,10 +9,9 @@
 # todo: the name of models in the baidu netdisk should be modified
 
 import torch
-from d_generate_rl_input import random_generate_rl_input, extract_generate_rl_input
-from e_load_onfig_file import load_config_file
-from c_precompression_extract_joint_training import model
-
+from RL.generate_rl_input import random_generate_rl_input, extract_generate_rl_input
+from Pruning.precompression_extract_joint_training import model
+from utils.load_config_file import load_config_file
 
 block_size = 100
 pruning_number_list = [100,1300,2500,3700,5000,6200,7500,8700,9300,9900]
@@ -28,7 +27,7 @@ if ours:#True
 
     config_file = './config_file/prune_ratio_v6.yaml'
     prune_ratios = load_config_file(config_file)
-    model.load_state_dict(torch.load('./model/random_column_pruning_bingbing_pattern.pt'))
+    model.load_state_dict(torch.load('./model/model_after_BP.pt'))
     para_set = extract_generate_rl_input(model,block_size,prune_ratios,pruning_number_list)
 
 else:
@@ -41,7 +40,7 @@ else:
 
         config_file = './config_file/prune_ratio_v6.yaml'
         prune_ratios = load_config_file(config_file)
-        model.load_state_dict(torch.load('./model/random_column_pruning_bingbing_pattern.pt'))
+        model.load_state_dict(torch.load('./model/model_after_BP.pt'))
         para_set = random_generate_rl_input(prune_ratios,pruning_number_list,block_size)
     else:#False False
         print('#' * 89)
@@ -52,7 +51,7 @@ else:
 
         config_file = './config_file/prune_ratio_v1.yaml'
         prune_ratios = load_config_file(config_file)
-        model.load_state_dict(torch.load('./model/random_column_pruning_average.pt'))
+        model.load_state_dict(torch.load('./model/model_after_rBP.pt'))
         para_set = extract_generate_rl_input(model,block_size,prune_ratios,pruning_number_list)
 
 
@@ -64,5 +63,5 @@ controller_params = {
     'hidden_units': 35,
     'max_episodes': 300,
     'epochs':1,
-    "timing_constraint":115#115 for high, 104 for middle,94 for low
+    "timing_constraint":115 #115 for high, 104 for middle,94 for low
 }

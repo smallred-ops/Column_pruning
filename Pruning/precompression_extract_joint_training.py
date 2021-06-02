@@ -5,19 +5,16 @@
 '''
 
 import copy
-import math
-import os
 import time
 import torch
 import torchtext
 from torchtext.data import get_tokenizer
 
-from b_pattern_pruning_CPU import build_whole_pattern, changed_pattern_pruning
-from a_extract_info_from_precompression import extract_original_layers_whole_pattern
+from Pruning.pattern_pruning_CPU import changed_pattern_pruning
+from Generate_patterns.extract_info_from_precompression import extract_original_layers_whole_pattern
 import torch.nn as nn
 
-from e_sparsity_ratio import sparsity_ratio
-from f_transformer_model import TransformerModel
+from Transformer_model import TransformerModel
 
 
 #keep batch data

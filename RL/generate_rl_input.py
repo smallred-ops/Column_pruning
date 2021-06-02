@@ -2,8 +2,8 @@
     This file is for the search space generation, including random patterns and extracted patterns for every layer and every sparsity ratio.
 '''
 
-from a_extract_info_from_precompression import compute_importance_weight, generate_layer_pattern
-from a_random_generate_discrete_pattern import generate_mask
+from Generate_patterns.extract_info_from_precompression import compute_importance_weight, generate_layer_pattern
+from Generate_patterns.random_generate_discrete_pattern import generate_mask
 
 
 def random_generate_rl_input(prune_ratios,pruning_number_list,block_size,random_number=10,repeat_number=4):

@@ -2,7 +2,7 @@
     This file is for the latency and number of runs computation.
 '''
 
-from c_precompression_extract_joint_training import model
+from Pruning.precompression_extract_joint_training import model
 
 #compute the all mulpitly operations of non-pruned model
 def all_multiply_operation_times():

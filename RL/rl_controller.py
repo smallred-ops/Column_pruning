@@ -5,27 +5,22 @@
 # %%
 
 import logging
-import csv
 import numpy as np
 import tensorflow as tf
 import sys
 
-from b_pattern_pruning_CPU import build_whole_pattern
-from c_precompression_extract_joint_training import train_prune
-from d_rl_input import controller_params, pruning_number_list, block_size
+from Pruning.pattern_pruning_CPU import build_whole_pattern
+from Pruning.precompression_extract_joint_training import train_prune
+from RL.rl_input import controller_params, pruning_number_list, block_size
 import termplotlib as tpl
 import copy
 import random
-from datetime import datetime
-import time
 import torch
-import os
 
-from e_runs_number_reward import times_reward
-from e_sparsity_ratio import whole_sparsity_ratio, sparsity_ratio
-from f_transformer_model import TransformerModel,PositionalEncoding
+from utils.runs_number_reward import times_reward
+from utils.sparsity_ratio import whole_sparsity_ratio, sparsity_ratio
 
-from d_rl_input import prune_ratios
+from RL.rl_input import prune_ratios
 
 
 # logger = logging.getLogger(__name__)
