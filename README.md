@@ -4,6 +4,10 @@
  - BaiDu NetDisk link:  https://pan.baidu.com/s/1OIV08F4tUqyFD1DGfbkJ5g 
  - Extraction code：1dtv 
 
+Or
+
+ - Google Drive link: https://drive.google.com/drive/folders/1mOYzWXVU6SWt34v0N1KOl62_vv04R6-n?usp=sharing
+
 #### step2: Environment
 conda env create -f pytorch_BCM_pruning.yml
  - python=3.6.9
